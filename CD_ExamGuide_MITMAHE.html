@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compiler Design — Exam Domination Guide | MIT MAHE</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --card: #1a1a26;
+    --border: #2a2a40;
+    --accent: #6c63ff;
+    --accent2: #ff6b6b;
+    --accent3: #43e97b;
+    --accent4: #f7971e;
+    --text: #e8e8f0;
+    --muted: #8888aa;
+    --code-bg: #0d0d18;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.7;
+  }
+
+  /* Navigation */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  }
+  nav span { color: var(--accent); font-family: 'JetBrains Mono'; font-size: 13px; font-weight: 700; margin-right: 8px; }
+  nav a {
+    color: var(--muted); text-decoration: none; font-size: 12px;
+    padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  nav a:hover { color: var(--accent); border-color: var(--accent); background: rgba(108,99,255,0.1); }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #0a0a1a 0%, #12082a 50%, #0a1520 100%);
+    padding: 60px 40px 40px;
+    border-bottom: 1px solid var(--border);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(108,99,255,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 20%, rgba(255,107,107,0.08) 0%, transparent 50%);
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.4);
+    color: var(--accent);
+    font-family: 'JetBrains Mono'; font-size: 11px; font-weight: 700;
+    padding: 4px 12px; border-radius: 20px; margin-bottom: 16px;
+    letter-spacing: 2px;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif; font-size: clamp(28px, 4vw, 52px); font-weight: 800;
+    line-height: 1.1; position: relative;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero p { color: var(--muted); max-width: 600px; margin-top: 12px; font-size: 15px; }
+  .hero-meta { display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap; }
+  .hero-meta span {
+    font-family: 'JetBrains Mono'; font-size: 12px;
+    padding: 4px 12px; border-radius: 6px;
+  }
+  .tag-red { background: rgba(255,107,107,0.15); color: var(--accent2); border: 1px solid rgba(255,107,107,0.3); }
+  .tag-green { background: rgba(67,233,123,0.1); color: var(--accent3); border: 1px solid rgba(67,233,123,0.3); }
+  .tag-gold { background: rgba(247,151,30,0.12); color: var(--accent4); border: 1px solid rgba(247,151,30,0.3); }
+  .tag-purple { background: rgba(108,99,255,0.12); color: var(--accent); border: 1px solid rgba(108,99,255,0.3); }
+
+  /* Layout */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  .section { padding: 40px 0; border-bottom: 1px solid var(--border); }
+  .section-title {
+    font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800;
+    margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+  }
+  .section-title .num {
+    background: var(--accent); color: #fff;
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; flex-shrink: 0;
+  }
+  .section-sub { color: var(--muted); margin-bottom: 28px; font-size: 14px; }
+
+  /* Cards */
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; margin-bottom: 16px;
+  }
+  .card-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 12px; gap: 12px; flex-wrap: wrap;
+  }
+  .card h3 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+  .card h4 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .card p, .card li { font-size: 14px; color: #cccce0; }
+  .card ul { padding-left: 18px; }
+  .card ul li { margin-bottom: 4px; }
+
+  .prob-badge {
+    font-family: 'JetBrains Mono'; font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+  }
+  .prob-fire { background: rgba(255,107,107,0.2); color: var(--accent2); border: 1px solid rgba(255,107,107,0.4); }
+  .prob-high { background: rgba(247,151,30,0.15); color: var(--accent4); border: 1px solid rgba(247,151,30,0.4); }
+  .prob-med { background: rgba(108,99,255,0.15); color: var(--accent); border: 1px solid rgba(108,99,255,0.3); }
+
+  .marks-badge {
+    font-family: 'JetBrains Mono'; font-size: 11px;
+    background: rgba(67,233,123,0.1); color: var(--accent3);
+    border: 1px solid rgba(67,233,123,0.3);
+    padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+  }
+
+  /* Grid layouts */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 700px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  /* Code blocks */
+  pre, code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg);
+    color: #a8e6cf;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  pre { padding: 16px; overflow-x: auto; border: 1px solid var(--border); margin: 8px 0; line-height: 1.6; }
+  code { padding: 2px 6px; }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    background: rgba(108,99,255,0.15); color: var(--accent);
+    padding: 10px 12px; text-align: left; font-family: 'JetBrains Mono'; font-size: 12px;
+    border: 1px solid var(--border);
+  }
+  td { padding: 9px 12px; border: 1px solid var(--border); color: #cccce0; }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  /* Alert boxes */
+  .alert {
+    border-radius: 10px; padding: 14px 18px; margin: 12px 0;
+    border-left: 3px solid; font-size: 14px;
+  }
+  .alert-fire { background: rgba(255,107,107,0.08); border-color: var(--accent2); }
+  .alert-gold { background: rgba(247,151,30,0.08); border-color: var(--accent4); }
+  .alert-green { background: rgba(67,233,123,0.08); border-color: var(--accent3); }
+  .alert-purple { background: rgba(108,99,255,0.08); border-color: var(--accent); }
+  .alert strong { display: block; margin-bottom: 4px; }
+
+  /* Progress bars */
+  .prob-bar { background: var(--border); border-radius: 4px; height: 6px; margin-top: 8px; overflow: hidden; }
+  .prob-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+
+  /* Step lists */
+  .steps { counter-reset: step; list-style: none; padding: 0; }
+  .steps li {
+    counter-increment: step; padding: 10px 10px 10px 44px;
+    position: relative; margin-bottom: 8px;
+    background: rgba(255,255,255,0.02); border-radius: 8px;
+    font-size: 14px; color: #cccce0;
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute; left: 10px; top: 10px;
+    background: var(--accent); color: #fff;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; font-family: 'JetBrains Mono';
+  }
+
+  /* Highlight spans */
+  .hl { color: var(--accent); font-weight: 600; }
+  .hl2 { color: var(--accent2); font-weight: 600; }
+  .hl3 { color: var(--accent3); font-weight: 600; }
+  .hl4 { color: var(--accent4); font-weight: 600; }
+
+  /* Q number */
+  .q-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-family: 'JetBrains Mono'; font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  /* Rank table */
+  .rank-1 td:first-child { color: #ffd700; font-weight: 700; }
+  .rank-2 td:first-child { color: #c0c0c0; font-weight: 700; }
+  .rank-3 td:first-child { color: #cd7f32; font-weight: 700; }
+
+  /* Revision box */
+  .rev-box {
+    border: 2px solid var(--accent2);
+    border-radius: 12px; padding: 20px;
+    background: rgba(255,107,107,0.05);
+  }
+
+  .footer {
+    padding: 40px; text-align: center; color: var(--muted); font-size: 13px;
+    background: var(--surface); border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <span>CD EXAM 🔥</span>
+  <a href="#analysis">P1 Analysis</a>
+  <a href="#questions">P2 Q&A</a>
+  <a href="#notes">P3 Notes</a>
+  <a href="#lr-ll">P4 LR/LL(1)</a>
+  <a href="#tac-dag">P5 TAC/DAG</a>
+  <a href="#revision">P6 Revision</a>
+  <a href="#strategy">P7 Strategy</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-badge">MIT MAHE · CSE 3151/3222 · COMPILER DESIGN</div>
+    <h1>Exam Domination<br><span>Master Guide 2024-26</span></h1>
+    <p>Deep analysis of 7 previous papers (2019–2026) + all 5 modules. Pattern-matched, examiner-decoded, score-maximised.</p>
+    <div class="hero-meta">
+      <span class="tag-red">🔥 7 Papers Analysed</span>
+      <span class="tag-green">✅ 30 Top Questions</span>
+      <span class="tag-gold">⚡ Crash Notes Included</span>
+      <span class="tag-purple">🎯 LR/LL Master Section</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- PART 1 — EXAM ANALYSIS -->
+<!-- ===================================================== -->
+<div class="section" id="analysis">
+<div class="container">
+  <div class="section-title"><div class="num">1</div>EXAM ANALYSIS — Pattern Intelligence</div>
+  <div class="section-sub">Based on cross-analysis of CSE3151 Nov/Dec 2023 & 2024, CSE3201 Apr/May 2019, Makeup June 2019, Feb 2022, Dec 2021, Midsem 2023 & 2026</div>
+
+  <div class="alert alert-fire">
+    <strong>🔥 EXAMINER FINGERPRINT (Dr. Raghu TV)</strong>
+    Every single paper follows identical structure: Q1=Lexical+Phases, Q2=Parsing(LL/LR), Q3=LR parsers+SDD, Q4=TAC/DAG/Quadruples, Q5=Code gen+Optimization. This pattern has NOT broken in 5 years.
+  </div>
+
+  <h3 style="font-family:Syne;font-size:18px;margin-bottom:16px;">1.1 · Topic Frequency Heat Map</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>#</th><th>Topic</th><th>Module</th><th>Occurrences</th><th>Total Marks</th><th>ROI Score</th></tr>
+      <tr class="rank-1"><td>🥇</td><td>FIRST / FOLLOW + Predictive Table + LL(1)</td><td>3</td><td>7/7 papers</td><td>~28M</td><td class="hl3">CRITICAL</td></tr>
+      <tr class="rank-2"><td>🥈</td><td>LR(0) / SLR(1) automaton + parse table</td><td>3</td><td>6/7 papers</td><td>~25M</td><td class="hl3">CRITICAL</td></tr>
+      <tr class="rank-3"><td>🥉</td><td>TAC / Quadruples / Triples</td><td>5</td><td>7/7 papers</td><td>~20M</td><td class="hl3">CRITICAL</td></tr>
+      <tr><td>4</td><td>DAG + Value Number Method</td><td>5</td><td>6/7 papers</td><td>~15M</td><td class="hl4">HIGH</td></tr>
+      <tr><td>5</td><td>Transition Diagrams (RE→NFA→DFA)</td><td>2</td><td>6/7 papers</td><td>~15M</td><td class="hl4">HIGH</td></tr>
+      <tr><td>6</td><td>Compiler Phases (with example walkthrough)</td><td>1</td><td>7/7 papers</td><td>~12M</td><td class="hl4">HIGH</td></tr>
+      <tr><td>7</td><td>Annotated Parse Tree + SDD Dependency Edges</td><td>4</td><td>5/7 papers</td><td>~12M</td><td class="hl4">HIGH</td></tr>
+      <tr><td>8</td><td>CLR(1) / LR(1) Items + Parse Table</td><td>3</td><td>5/7 papers</td><td>~12M</td><td class="hl4">HIGH</td></tr>
+      <tr><td>9</td><td>LEX/FLEX programs</td><td>2</td><td>5/7 papers</td><td>~10M</td><td>MEDIUM</td></tr>
+      <tr><td>10</td><td>Basic Blocks + Flow Graphs</td><td>5</td><td>5/7 papers</td><td>~10M</td><td>MEDIUM</td></tr>
+      <tr><td>11</td><td>Left Recursion Elimination + Left Factoring</td><td>3</td><td>5/7 papers</td><td>~8M</td><td>MEDIUM</td></tr>
+      <tr><td>12</td><td>Error Recovery (Panic Mode + Phrase Level)</td><td>3</td><td>5/7 papers</td><td>~6M</td><td>MEDIUM</td></tr>
+      <tr><td>13</td><td>Peephole Optimization</td><td>5</td><td>4/7 papers</td><td>~8M</td><td>MEDIUM</td></tr>
+      <tr><td>14</td><td>Input Buffering / Two Buffer Schema</td><td>2</td><td>4/7 papers</td><td>~5M</td><td>LOW-MED</td></tr>
+      <tr><td>15</td><td>S-attributed vs L-attributed SDD</td><td>4</td><td>3/7 papers</td><td>~4M</td><td>LOW-MED</td></tr>
+    </table>
+  </div>
+
+  <div class="divider"></div>
+  <div class="grid-2" style="margin-top:20px;">
+    <div class="card" style="border-color:rgba(255,107,107,0.4);">
+      <h3 style="color:var(--accent2);">🚫 SAFELY SKIP (Low ROI)</h3>
+      <ul style="margin-top:10px;">
+        <li>Activation Records / Calling sequences (only in 2019 paper)</li>
+        <li>Code generation register allocation theory</li>
+        <li>Symbol table data structures theory</li>
+        <li>SSA (Static Single Assignment) — only in module, never exam</li>
+        <li>YACC program writing (only once, low marks)</li>
+        <li>Assembler role in language processing (once, 2019)</li>
+        <li>Global error correction (theory only)</li>
+      </ul>
+    </div>
+    <div class="card" style="border-color:rgba(67,233,123,0.4);">
+      <h3 style="color:var(--accent3);">✅ ABSOLUTELY CANNOT SKIP</h3>
+      <ul style="margin-top:10px;">
+        <li><strong>FIRST/FOLLOW rules + computation</strong> — every paper</li>
+        <li><strong>LL(1) parse table + parsing trace</strong> — every paper</li>
+        <li><strong>LR(0)/SLR(1) DFA construction</strong> — 6/7 papers</li>
+        <li><strong>CLR(1)/LR(1) items</strong> — 5/7 papers</li>
+        <li><strong>TAC + Quadruples for expressions+loops</strong> — every paper</li>
+        <li><strong>DAG construction + value numbers</strong> — 6/7 papers</li>
+        <li><strong>Transition diagrams for RE</strong> — 6/7 papers</li>
+        <li><strong>Compiler phases walkthrough</strong> — every paper</li>
+        <li><strong>Annotated parse tree with SDD</strong> — 5/7 papers</li>
+        <li><strong>Left recursion + left factoring</strong> — every relevant Q2</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="alert alert-gold" style="margin-top:16px;">
+    <strong>⚡ FASTEST MARKS (20 marks in 30 mins)</strong>
+    Q1A phases of compiler (3M) + Q1C transition diagram (5M) + Q4B DAG small expression (2-3M) + Q5 peephole 2M. These 4 sub-questions are highly formulaic — learn the templates, fill in the blanks.
+  </div>
+</div>
+</div>
+
+<!-- ===================================================== -->
+<!-- PART 2 — TOP 30 QUESTIONS -->
+<!-- ===================================================== -->
+<div class="section" id="questions">
+<div class="container">
+  <div class="section-title"><div class="num">2</div>TOP 30 HIGH-PROBABILITY QUESTIONS</div>
+  <div class="section-sub">Ranked by cross-paper frequency × marks × difficulty. Each with solving strategy and common mistakes.</div>
+
+  <!-- Q1 -->
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;gap:10px;align-items:center;"><span class="q-num">1</span><h3>Explain all phases of compiler with example: a = b + c * (d + f)</h3></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="prob-badge prob-fire">🔥 CERTAIN</span><span class="marks-badge">3–5M</span><span class="tag-purple">Module 1</span></div>
+    </div>
+    <div class="alert alert-green"><strong>TEMPLATE ANSWER (write exactly this structure):</strong>
+      1. Lexical: tokens → &lt;id,1&gt; &lt;=&gt; &lt;id,2&gt; &lt;+&gt; &lt;id,3&gt; &lt;*&gt; &lt;(&gt; &lt;id,4&gt; &lt;+&gt; &lt;id,5&gt; &lt;)&gt;<br>
+      2. Syntax: Parse tree / syntax tree (draw it)<br>
+      3. Semantic: Annotated tree with type labels<br>
+      4. ICG: t1=d+f; t2=c*t1; t3=b+t2; a=t3<br>
+      5. Code Opt: t1=d+f; t2=c*t1; a=b+t2 (eliminate t3)<br>
+      6. Code Gen: LOAD R1,d; ADD R1,f; MUL R1,c; ADD R1,b; STORE a,R1
+    </div>
+    <p><strong>Common mistake:</strong> Skipping code optimization step or wrong syntax tree structure. Draw tree first, THEN derive ICG from it.</p>
+  </div>
+
+  <!-- Q2 -->
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;gap:10px;align-items:center;"><span class="q-num">2</span><h3>Construct FIRST, FOLLOW, and LL(1) parse table for given grammar</h3></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="prob-badge prob-fire">🔥 CERTAIN</span><span class="marks-badge">5M</span><span class="tag-purple">Module 3</span></div>
+    </div>
+    <div class="alert alert-purple"><strong>STANDARD GRAMMAR (memorise this — appears in 4 papers):</strong><br>
+      E→TA, A→+TA|−TA|ε, T→FB, B→*FB|/FB|ε, F→−S|S, S→v|(E)<br>
+      FIRST(E)=FIRST(T)=FIRST(F)=FIRST(S)={v,(,−}<br>
+      FIRST(A)={+,−,ε} | FIRST(B)={*,/,ε}<br>
+      FOLLOW(E)={$,)} | FOLLOW(A)={$,)} | FOLLOW(T)={+,−,$,)} | FOLLOW(B)={+,−,$,)}
+    </div>
+    <p><strong>Solving strategy:</strong> FIRST → FOLLOW → Table → Parse trace. Never skip the parse trace — it gets 1–2 marks for free.</p>
+    <p><strong>Common mistake:</strong> Forgetting to add FOLLOW(A) to table when A→ε exists. Rule: If ε ∈ FIRST(α), then for each b ∈ FOLLOW(A), set M[A,b] = A→ε.</p>
+  </div>
+
+  <!-- Q3 -->
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;gap:10px;align-items:center;"><span class="q-num">3</span><h3>Construct LR(0) automaton and SLR(1) parse table for grammar</h3></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="prob-badge prob-fire">🔥 CERTAIN</span><span class="marks-badge">5M</span><span class="tag-purple">Module 3</span></div>
+    </div>
+    <div class="alert alert-gold"><strong>EXACT STEPS (5 marks = 5 steps):</strong><br>
+      1. Augment: S'→S (1M)<br>
+      2. Build I0 from [S'→•S], closure, compute I1...In (2M)<br>
+      3. Identify GOTO table from transitions<br>
+      4. Identify ACTION table: shift on terminal, reduce on FOLLOW when dot at end (1M)<br>
+      5. Parse trace for given string (1M)
+    </div>
+    <p><strong>Most repeated grammar:</strong> S→a|^|(T), T→ST|T',T'→,ST|ε (appears twice) and SABC grammar variants. Reduce states = states where dot is at end of production.</p>
+  </div>
+
+  <!-- Q4 -->
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;gap:10px;align-items:center;"><span class="q-num">4</span><h3>Construct CLR(1) / LR(1) automaton and parse table</h3></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="prob-badge prob-fire">🔥 CERTAIN</span><span class="marks-badge">5M</span><span class="tag-purple">Module 3</span></div>
+    </div>
+    <p>LR(1) items = [A→α•β, a] where a is lookahead. Most repeated grammars: P→mPnP|nPmP|ε (CSE3151 Dec 2023) and W→(P)|g, P→P,W|W (Makeup 2022).</p>
+    <div class="alert alert-purple"><strong>KEY DIFFERENCE from SLR:</strong> In SLR, reduce on FOLLOW(A). In CLR(1), reduce ONLY on the lookahead in the item [A→α•, a] — more selective, fewer conflicts.</div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;gap:10px;align-items:center;"><span class="q-num">5</span><h3>TAC + Quadruples for while loop / array access</h3></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="prob-badge prob-fire">🔥 CERTAIN</span><span class="marks-badge">5M</span><span class="tag-purple">Module 5</span></div>
+    </div>
+    <div class="alert alert-gold"><strong>REPEATED EXACT CODE (i=1; while(i&lt;=10){A[i]=0; i=i+1;}):</strong>
+<pre>t1 = 1
+i = t1
+L1: t2 = i <= 10
+    if False t2 goto L3
+    t3 = i * 4          // array offset (4 bytes)
+    A[t3] = 0
+    t4 = i + 1
+    i = t4
+    goto L1
+L3: ...</pre>
+    Quadruples: (op, arg1, arg2, result) for each line above.
+    </div>
+    <p><strong>Common mistake:</strong> Forgetting array offset multiplication. Always: offset = index * element_size.</p>
+  </div>
+
+  <!-- Q6 -->
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;gap:10px;align-items:center;"><span class="q-num">6</span><h3>DAG construction + Value Number Method for expression</h3></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="prob-badge prob-fire">🔥 CERTAIN</span><span class="marks-badge">3–5M</span><span class="tag-purple">Module 5</span></div>
+    </div>
+    <p>Most repeated: <code>(x+y)*(y+z)+(x+y+z)</code> and <code>a+a*(b-c)+(b-c)*d</code> and <code>z=((a+b)*c)+b+((a*a)+b+(a*a))</code></p>
+    <div class="alert alert-green"><strong>VALUE NUMBER METHOD STEPS:</strong><br>
+      For each sub-expr: check if (op, VN(left), VN(right)) already exists in table. If yes → reuse node (no new node). If no → create new node with next VN.<br>
+      Result: DAG has fewer nodes than AST. State this explicitly for marks.
+    </div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;gap:10px;align-items:center;"><span class="q-num">7</span><h3>Draw transition diagram for RE (signed numbers, operators, hex)</h3></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="prob-badge prob-fire">🔥 CERTAIN</span><span class="marks-badge">5M</span><span class="tag-purple">Module 2</span></div>
+    </div>
+    <p>Most repeated: signed decimal (±integer.fraction E±exp), bitwise operators (&, &&, |, ||), relational operators (&lt;, &gt;, &lt;=, &gt;=, ==, !=), hex/octal constants.</p>
+    <div class="alert alert-purple"><strong>TEMPLATE for signed decimal:</strong><br>
+      s0 →(+|−|ε)→ s1 →(digit)→ s2 →(digit*)→ s2 →(.)→ s3 →(digit)→ s4 →(digit*)→ s4 [accept] →(E)→ s5 →(+|−|ε)→ s6 →(digit)→ s7 [accept]
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;gap:10px;align-items:center;"><span class="q-num">8</span><h3>Annotated parse tree with SDD dependency edges</h3></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="prob-badge prob-fire">🔥 CERTAIN</span><span class="marks-badge">3–5M</span><span class="tag-purple">Module 4</span></div>
+    </div>
+    <p>Most repeated grammars: E→TE', E'→+TE'|ε, T→FT', T'→*FT'|ε, F→(E)|digit. Expression: (9+8*5)*4 and (1+2*(3+4)+5)*6.</p>
+    <div class="alert alert-gold"><strong>SEMANTIC RULES to memorise:</strong><br>
+      E.val = T.val + E'.val (if +)<br>
+      E'.inh = T.val (inherited attribute flows DOWN)<br>
+      E.val = E'.syn (synthesized attribute flows UP)
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;gap:10px;align-items:center;"><span class="q-num">9</span><h3>LEX/FLEX program (count identifiers, words, or specific patterns)</h3></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="prob-badge prob-high">HIGH</span><span class="marks-badge">2M</span><span class="tag-purple">Module 2</span></div>
+    </div>
+<pre>%{
+  int count = 0;
+%}
+%%
+[a-zA-Z][a-zA-Z0-9]*  { count++; }
+.|\n                   { /* ignore */ }
+%%
+int main() {
+    yylex();
+    printf("Identifiers: %d\n", count);
+    return 0;
+}</pre>
+    <p><strong>Pattern:</strong> Section 1 = declarations, Section 2 = rules, Section 3 = C code. Always include <code>yywrap(){ return 1; }</code> if needed.</p>
+  </div>
+
+  <!-- Q10 -->
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;gap:10px;align-items:center;"><span class="q-num">10</span><h3>Left recursion elimination + left factoring</h3></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="prob-badge prob-high">HIGH</span><span class="marks-badge">2M</span><span class="tag-purple">Module 3</span></div>
+    </div>
+    <div class="alert alert-purple"><strong>FORMULA (immediate left recursion):</strong><br>
+      A → Aα | β &nbsp; becomes &nbsp; A → βA', A' → αA' | ε<br><br>
+      <strong>Left factoring:</strong><br>
+      A → αβ₁ | αβ₂ &nbsp; becomes &nbsp; A → αA', A' → β₁ | β₂
+    </div>
+    <p>Most repeated: E→E+T|T becomes E→TE', E'→+TE'|ε. Applies to ANY A→Aα|β form.</p>
+  </div>
+
+  <!-- Q11 -->
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;gap:10px;align-items:center;"><span class="q-num">11</span><h3>Basic blocks + flow graph from TAC</h3></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="prob-badge prob-high">HIGH</span><span class="marks-badge">3M</span><span class="tag-purple">Module 5</span></div>
+    </div>
+    <div class="alert alert-gold"><strong>LEADER RULES (3 rules, always state them):</strong><br>
+      1. First instruction is a leader<br>
+      2. Any instruction that is the target of a goto is a leader<br>
+      3. Any instruction immediately following a goto/conditional is a leader<br><br>
+      Flow graph: each basic block = one node. Draw directed edges for control flow.
+    </div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;gap:10px;align-items:center;"><span class="q-num">12</span><h3>Panic mode vs phrase-level error recovery</h3></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="prob-badge prob-high">HIGH</span><span class="marks-badge">2M</span><span class="tag-purple">Module 3</span></div>
+    </div>
+    <p><strong>Panic mode:</strong> Discard tokens until synchronizing token (;, }, end keyword) is found. Simple but may skip large input.<br>
+    <strong>Phrase-level:</strong> Local correction — insert, delete, or replace tokens to continue parsing. Example: <code>a = b + * c</code> → delete *, treat as <code>a = b + c</code>.</p>
+    <p><strong>Key for marks:</strong> Give a different example for each. 1M per method.</p>
+  </div>
+
+  <!-- Q13 -->
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;gap:10px;align-items:center;"><span class="q-num">13</span><h3>Is grammar LL(1)? State conditions and verify.</h3></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="prob-badge prob-high">HIGH</span><span class="marks-badge">2–3M</span><span class="tag-purple">Module 3</span></div>
+    </div>
+    <div class="alert alert-green"><strong>3 CONDITIONS FOR LL(1) (write all 3):</strong><br>
+      1. No left recursion<br>
+      2. Left-factored (no common prefix in alternatives)<br>
+      3. For every A→α₁|α₂: FIRST(α₁) ∩ FIRST(α₂) = ∅, AND if ε∈FIRST(αᵢ) then FIRST(αⱼ) ∩ FOLLOW(A) = ∅
+    </div>
+    <p>To PROVE not LL(1): Show a cell in the parse table with multiple entries. State which FIRST sets intersect.</p>
+  </div>
+
+  <!-- Q14 -->
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;gap:10px;align-items:center;"><span class="q-num">14</span><h3>Peephole optimization — 3 types with examples</h3></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="prob-badge prob-high">HIGH</span><span class="marks-badge">2–5M</span><span class="tag-purple">Module 5</span></div>
+    </div>
+    <div class="alert alert-purple"><strong>3 TYPES TO MEMORISE (with examples):</strong><br>
+      1. <strong>Redundant load/store:</strong> MOV R0,a; MOV a,R0 → delete second instruction<br>
+      2. <strong>Algebraic simplification:</strong> x = x+0 → delete; x = x*1 → delete; x = 2*y → x = y+y<br>
+      3. <strong>Flow-of-control:</strong> goto L1; L1: goto L2 → replace with goto L2<br>
+      4. <strong>Unreachable code:</strong> goto L; (unreachable stmts); L: → delete unreachable stmts
+    </div>
+  </div>
+
+  <!-- Q15 -->
+  <div class="card">
+    <div class="card-header">
+      <div style="display:flex;gap:10px;align-items:center;"><span class="q-num">15</span><h3>Token stream from source code + lexical analyzer interaction diagram</h3></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><span class="prob-badge prob-high">HIGH</span><span class="marks-badge">3M</span><span class="tag-purple">Module 2</span></div>
+    </div>
+    <p>Identify tokens for code like <code>if a12 &lt;=b3 then a12 = b3 * 25 else a12 = 5</code>. Pattern: keywords → exact token, identifiers → &lt;id,n&gt; with symbol table pointer, operators → &lt;op&gt;, numbers → &lt;num,val&gt;.</p>
+    <p><strong>getNextToken() call count:</strong> Count every token including EOF. Typical answer = 14–16 calls.</p>
+  </div>
+
+  <!-- Q16–30 condensed -->
+  <div class="grid-2" style="margin-top:16px;">
+    <div class="card">
+      <h3 style="color:var(--accent4);margin-bottom:12px;">⚡ Questions 16–23 (HIGH probability)</h3>
+      <ul>
+        <li style="margin-bottom:8px;font-size:13px;"><span class="q-num" style="width:22px;height:22px;font-size:10px;">16</span> &nbsp; <strong>Two-buffer input scheme</strong> with sentinels. Draw pair of buffers, explain lexemeBegin and forward pointers. [2M]</li>
+        <li style="margin-bottom:8px;font-size:13px;"><span class="q-num" style="width:22px;height:22px;font-size:10px;">17</span> &nbsp; <strong>Handle reserved words</strong>: Method 1 = pre-install in symbol table; Method 2 = separate keyword table. [2M]</li>
+        <li style="margin-bottom:8px;font-size:13px;"><span class="q-num" style="width:22px;height:22px;font-size:10px;">18</span> &nbsp; <strong>Triples representation</strong> of TAC: 3 fields only (op, arg1, arg2); result referenced by position. Indirect triples add pointer list. [2M]</li>
+        <li style="margin-bottom:8px;font-size:13px;"><span class="q-num" style="width:22px;height:22px;font-size:10px;">19</span> &nbsp; <strong>S-attributed vs L-attributed SDD</strong>: S-attributed = only synthesized (evaluated bottom-up). L-attributed = synthesized + inherited (evaluated top-down). [2M]</li>
+        <li style="margin-bottom:8px;font-size:13px;"><span class="q-num" style="width:22px;height:22px;font-size:10px;">20</span> &nbsp; <strong>SDD for float w,x,y,z</strong> using D→TL, T→int|float, L→L,id|id. Derive annotated parse tree. [3-5M]</li>
+        <li style="margin-bottom:8px;font-size:13px;"><span class="q-num" style="width:22px;height:22px;font-size:10px;">21</span> &nbsp; <strong>Code generation for array access</strong> x=a[i] with 4-byte elements: compute t=i*4, then x=a[t]. Cost = 2 instructions. [2M]</li>
+        <li style="margin-bottom:8px;font-size:13px;"><span class="q-num" style="width:22px;height:22px;font-size:10px;">22</span> &nbsp; <strong>SLR vs CLR comparison</strong>: SLR reduces on FOLLOW, CLR reduces on per-item lookahead. CLR more powerful (fewer conflicts).</li>
+        <li style="margin-bottom:8px;font-size:13px;"><span class="q-num" style="width:22px;height:22px;font-size:10px;">23</span> &nbsp; <strong>Regular expression for MAC address</strong> (CSE322207Mar2026): hex = [0-9A-Fa-f], group = hex{2}, sep = (:|-), MAC = group(sep group){5}.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--muted);margin-bottom:12px;">📝 Questions 24–30 (MEDIUM probability)</h3>
+      <ul>
+        <li style="margin-bottom:8px;font-size:13px;"><span class="q-num" style="width:22px;height:22px;font-size:10px;background:var(--muted);">24</span> &nbsp; <strong>Ambiguous grammar proof</strong>: Show two different parse trees OR two different leftmost derivations for same string. [3M]</li>
+        <li style="margin-bottom:8px;font-size:13px;"><span class="q-num" style="width:22px;height:22px;font-size:10px;background:var(--muted);">25</span> &nbsp; <strong>NFA to DFA (subset construction)</strong>: Build DFA states as sets of NFA states. Common for RE like (a|b)*abb. [3M]</li>
+        <li style="margin-bottom:8px;font-size:13px;"><span class="q-num" style="width:22px;height:22px;font-size:10px;background:var(--muted);">26</span> &nbsp; <strong>Predictive parsing pseudocode</strong>: Stack-based non-recursive. Algorithm: while stack≠$ do { if top=terminal match; if top=NT use table; if error}. [2M]</li>
+        <li style="margin-bottom:8px;font-size:13px;"><span class="q-num" style="width:22px;height:22px;font-size:10px;background:var(--muted);">27</span> &nbsp; <strong>ICG roles</strong>: Machine-independence, retargetability (m×n compilers = m+n), optimization-friendly. List 4 types of IR. [2M]</li>
+        <li style="margin-bottom:8px;font-size:13px;"><span class="q-num" style="width:22px;height:22px;font-size:10px;background:var(--muted);">28</span> &nbsp; <strong>TAC for if-else with boolean</strong>: Use conditional gotos. Generate backpatching-style code. [5M]</li>
+        <li style="margin-bottom:8px;font-size:13px;"><span class="q-num" style="width:22px;height:22px;font-size:10px;background:var(--muted);">29</span> &nbsp; <strong>CFG vs RE</strong>: RE ⊂ CFL. All regular languages are CFLs, but not vice versa. No RE can match balanced parentheses. [2M]</li>
+        <li style="margin-bottom:8px;font-size:13px;"><span class="q-num" style="width:22px;height:22px;font-size:10px;background:var(--muted);">30</span> &nbsp; <strong>Longest match + first match rule</strong> in lexical analysis. Example: "if" matches keyword before identifier because keyword rule listed first. [2M]</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===================================================== -->
+<!-- PART 3 — CRASH NOTES -->
+<!-- ===================================================== -->
+<div class="section" id="notes">
+<div class="container">
+  <div class="section-title"><div class="num">3</div>CRASH COURSE NOTES — Write-in-Exam Format</div>
+  <div class="section-sub">Formula-first, no padding. Each section = complete answer you can write in exam verbatim.</div>
+
+  <div class="grid-2">
+    <!-- Compiler phases -->
+    <div class="card">
+      <h3 style="color:var(--accent);">📦 6 Phases of Compiler</h3>
+      <div style="margin-top:10px;font-size:13px;">
+        <p><span class="hl">1. Lexical Analysis:</span> char stream → tokens (token-name, attr-val). Removes whitespace/comments. Uses RE.</p>
+        <p><span class="hl">2. Syntax Analysis:</span> tokens → parse tree. Uses CFG. Reports syntax errors.</p>
+        <p><span class="hl">3. Semantic Analysis:</span> type checking, scope checking. Uses symbol table. Produces annotated tree.</p>
+        <p><span class="hl">4. ICG:</span> parse tree → TAC / IR. Machine-independent.</p>
+        <p><span class="hl">5. Code Optimization:</span> improve TAC. Faster/smaller code. Machine-independent.</p>
+        <p><span class="hl">6. Code Generation:</span> TAC → target machine code. Register allocation.</p>
+        <p style="margin-top:8px;"><span class="hl2">+ Symbol Table:</span> Shared data structure. Stores identifiers, types, scope, address.</p>
+      </div>
+    </div>
+
+    <!-- RE/DFA/NFA -->
+    <div class="card">
+      <h3 style="color:var(--accent);">🔤 RE / NFA / DFA Quick Reference</h3>
+      <div style="font-size:13px;margin-top:10px;">
+        <p><span class="hl">RE Operators:</span> r|s (union), rs (concat), r* (Kleene), r+ (≥1), r? (0 or 1), [a-z] (class)</p>
+        <p><span class="hl">Thompson's NFA:</span> RE→NFA. Each operator adds states. ε-transitions allowed.</p>
+        <p><span class="hl">Subset Construction (NFA→DFA):</span> DFA state = set of NFA states. Start = ε-closure(q0). Transition = ε-closure(move(S,a)).</p>
+        <p><span class="hl">DFA minimisation:</span> Hopcroft algorithm. Partition into {accept} and {non-accept}, then refine.</p>
+        <p><span class="hl">Identifier RE:</span> letter(letter|digit)* where letter=[a-zA-Z_], digit=[0-9]</p>
+        <p><span class="hl">Integer RE:</span> digit+ = [0-9]+</p>
+        <p><span class="hl">Float RE:</span> digit+(.digit+)?(E(+|-)?digit+)?</p>
+      </div>
+    </div>
+
+    <!-- Input buffering -->
+    <div class="card">
+      <h3 style="color:var(--accent);">📥 Input Buffering — Two Buffer Schema</h3>
+      <div style="font-size:13px;margin-top:10px;">
+        <p><span class="hl">Problem:</span> Single buffer requires 2 reads per char (read char, check if boundary).</p>
+        <p><span class="hl">Solution:</span> Two buffers of N chars each. Sentinel EOF at end of each half.</p>
+        <p><span class="hl">Pointers:</span> lexemeBegin = start of current lexeme. forward = current scan position.</p>
+        <p><span class="hl">Trick:</span> forward hits eof → reload other buffer; hits EOF → end of file.</p>
+        <p style="margin-top:8px;"><span class="hl2">Pair Buffer Example:</span> "pos=i**j" — forward scans to first *, then second *. If * is hit at boundary of buffer, reload happens transparently.</p>
+      </div>
+    </div>
+
+    <!-- FIRST/FOLLOW -->
+    <div class="card">
+      <h3 style="color:var(--accent);">🎯 FIRST & FOLLOW — Complete Rules</h3>
+      <div style="font-size:13px;margin-top:10px;">
+        <p><span class="hl">FIRST(X):</span></p>
+        <ul style="padding-left:16px;margin-bottom:8px;">
+          <li>If X=terminal: FIRST(X)={X}</li>
+          <li>If X→ε: add ε to FIRST(X)</li>
+          <li>If X→Y₁Y₂...Yₙ: add FIRST(Y₁)−{ε}; if ε∈FIRST(Y₁), add FIRST(Y₂)−{ε}; ... if ε in all, add ε</li>
+        </ul>
+        <p><span class="hl">FOLLOW(A):</span></p>
+        <ul style="padding-left:16px;">
+          <li>FOLLOW(S) = {$} (start symbol)</li>
+          <li>If A→αBβ: add FIRST(β)−{ε} to FOLLOW(B)</li>
+          <li>If A→αB or ε∈FIRST(β): add FOLLOW(A) to FOLLOW(B)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- LL(1) -->
+    <div class="card">
+      <h3 style="color:var(--accent);">📋 LL(1) Parse Table Algorithm</h3>
+      <div style="font-size:13px;margin-top:10px;">
+        <p><span class="hl">For each production A→α:</span></p>
+        <ol style="padding-left:18px;margin-bottom:8px;">
+          <li>For each terminal a ∈ FIRST(α): add A→α to M[A,a]</li>
+          <li>If ε ∈ FIRST(α): for each b ∈ FOLLOW(A): add A→α to M[A,b]</li>
+          <li>If ε ∈ FIRST(α) and $ ∈ FOLLOW(A): add A→α to M[A,$]</li>
+        </ol>
+        <p><span class="hl">Parsing algorithm:</span> Stack has grammar symbols. Pop X, look at input a:<br>
+        — X=terminal: if X=a, pop & advance input; else ERROR<br>
+        — X=NT: use M[X,a] to push production body in reverse order<br>
+        — X=$: if input=$, ACCEPT; else ERROR</p>
+      </div>
+    </div>
+
+    <!-- LR parsing summary -->
+    <div class="card">
+      <h3 style="color:var(--accent);">⚙️ LR Parsing — 3 Types Compared</h3>
+      <div style="font-size:13px;margin-top:10px;">
+        <table style="font-size:12px;">
+          <tr><th>Type</th><th>Items</th><th>Reduce on</th><th>Power</th></tr>
+          <tr><td>LR(0)</td><td>[A→α•β]</td><td>all terminals</td><td>lowest</td></tr>
+          <tr><td>SLR(1)</td><td>[A→α•β]</td><td>FOLLOW(A)</td><td>medium</td></tr>
+          <tr><td>CLR(1)</td><td>[A→α•β, a]</td><td>lookahead a</td><td>highest</td></tr>
+        </table>
+        <p style="margin-top:8px;"><span class="hl">GOTO:</span> transitions on non-terminals. <span class="hl">ACTION:</span> transitions on terminals.</p>
+        <p><span class="hl">Shift-Reduce conflict:</span> item has both •a and [A→α•] in same state.</p>
+        <p><span class="hl">Reduce-Reduce conflict:</span> two different complete items [A→α•] and [B→β•] in same state.</p>
+      </div>
+    </div>
+
+    <!-- SDD -->
+    <div class="card">
+      <h3 style="color:var(--accent);">🌳 SDD — Syntax Directed Definitions</h3>
+      <div style="font-size:13px;margin-top:10px;">
+        <p><span class="hl">Synthesized attribute:</span> computed from children. Flows UP. Can use bottom-up parser.</p>
+        <p><span class="hl">Inherited attribute:</span> computed from parent/siblings. Flows DOWN. Needs top-down evaluation.</p>
+        <p><span class="hl">Dependency graph:</span> edge from A.attr to B.attr if B.attr is computed using A.attr. If acyclic → can evaluate.</p>
+        <p><span class="hl">S-attributed SDD:</span> all synthesized. Evaluated in postorder (bottom-up).</p>
+        <p><span class="hl">L-attributed SDD:</span> synthesized + inherited where inherited comes from left siblings or parent only.</p>
+        <p style="margin-top:6px;"><span class="hl2">Key exam task:</span> Write semantic rules for each production, draw annotated parse tree, show attribute values at each node.</p>
+      </div>
+    </div>
+
+    <!-- DAG/TAC -->
+    <div class="card">
+      <h3 style="color:var(--accent);">💡 DAG vs AST vs TAC</h3>
+      <div style="font-size:13px;margin-top:10px;">
+        <p><span class="hl">AST (Abstract Syntax Tree):</span> tree, no node sharing. n expressions = n nodes.</p>
+        <p><span class="hl">DAG:</span> like AST but common subexpressions share nodes. Fewer nodes = more efficient code.</p>
+        <p><span class="hl">TAC:</span> linear sequence. At most 3 addresses per instruction. Types: x=y op z | x=op y | x=y | goto L | if x goto L | x=y[i] | x[i]=y</p>
+        <p><span class="hl">Quadruples:</span> (op, arg1, arg2, result) — 4 fields. result stored explicitly.</p>
+        <p><span class="hl">Triples:</span> (op, arg1, arg2) — no result field; result = position number (0), (1), ... Code optimization harder.</p>
+        <p><span class="hl">Indirect triples:</span> Triples + pointer array. Allows reordering without changing triples. Best for optimization.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Peephole -->
+  <div class="card" style="margin-top:0;">
+    <h3 style="color:var(--accent);">🔍 Peephole Optimization — Complete List</h3>
+    <div class="grid-3" style="margin-top:10px;gap:12px;">
+      <div>
+        <h4>1. Redundant loads/stores</h4>
+        <pre style="font-size:11px;padding:8px;">MOV R0, a
+MOV a, R0  ← delete</pre>
+      </div>
+      <div>
+        <h4>2. Algebraic simplification</h4>
+        <pre style="font-size:11px;padding:8px;">x = x + 0  ← delete
+x = x * 1  ← delete
+x = 2 * y  → x = y + y</pre>
+      </div>
+      <div>
+        <h4>3. Unreachable code</h4>
+        <pre style="font-size:11px;padding:8px;">goto L
+x = 1     ← unreachable
+y = 2     ← delete both
+L: ...</pre>
+      </div>
+      <div>
+        <h4>4. Flow-of-control</h4>
+        <pre style="font-size:11px;padding:8px;">goto L1
+L1: goto L2
+→ replace with goto L2</pre>
+      </div>
+      <div>
+        <h4>5. Reduction in strength</h4>
+        <pre style="font-size:11px;padding:8px;">x = x ** 2  → x = x * x
+x = x * 4   → x = x &lt;&lt; 2</pre>
+      </div>
+      <div>
+        <h4>6. Machine idioms</h4>
+        <pre style="font-size:11px;padding:8px;">x = x + 1  → INC x
+(use hardware increment)</pre>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===================================================== -->
+<!-- PART 4 — LR/LL(1) MASTER -->
+<!-- ===================================================== -->
+<div class="section" id="lr-ll">
+<div class="container">
+  <div class="section-title"><div class="num">4</div>LR / LL(1) MASTER SECTION</div>
+  <div class="section-sub">Fastest shortcuts, conflict detection, full solved examples from scratch.</div>
+
+  <div class="alert alert-fire">
+    <strong>⚡ SPEED TRICKS</strong>
+    FIRST: start from terminals and work up. FOLLOW: start from S=$, propagate right. For LR(0): only state with dot at END is reduce state. For conflicts: if FOLLOW(A) overlaps with any SHIFT terminal in same state = shift-reduce conflict.
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3 style="color:var(--accent2);">🏎️ Fast FIRST/FOLLOW Method</h3>
+      <ol class="steps">
+        <li>List all productions in a table</li>
+        <li>FIRST: For each NT, look at first symbol of each production body. If terminal → add it. If NT → recurse. If production is A→ε → add ε.</li>
+        <li>Repeat until no changes (fixed point)</li>
+        <li>FOLLOW: Place $ in FOLLOW(start). Then scan all productions for β after each NT.</li>
+        <li>If A→αBβ and β≠ε: add FIRST(β)−{ε} to FOLLOW(B)</li>
+        <li>If A→αB or (ε∈FIRST(β)): add FOLLOW(A) to FOLLOW(B)</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--accent2);">🎯 Conflict Detection Cheatsheet</h3>
+      <div class="alert alert-gold" style="margin-top:8px;">
+        <strong>Shift-Reduce Conflict:</strong> In state I, there's both [A→α•aβ] AND [B→γ•] where a ∈ FOLLOW(B).<br>
+        Can usually resolve by: shift preferred over reduce (for operators).
+      </div>
+      <div class="alert alert-fire" style="margin-top:8px;">
+        <strong>Reduce-Reduce Conflict:</strong> In state I, [A→α•] AND [B→β•] both present, AND FOLLOW(A)∩FOLLOW(B)≠∅.<br>
+        This is a more serious conflict — grammar may not be SLR(1).
+      </div>
+      <p style="font-size:13px;margin-top:8px;"><span class="hl">Quick check:</span> Count complete items in each state. If 0 or 1 → no conflict from reduces. If 2+ → check FOLLOW overlap.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SOLVED LL(1) -->
+  <h3 style="font-family:Syne;font-size:18px;margin-bottom:16px;color:var(--accent3);">✅ SOLVED EXAMPLE 1 — LL(1) Full Solution</h3>
+  <div class="card">
+    <p style="font-size:13px;"><strong>Grammar:</strong> E→TA, A→+TA|ε, T→FB, B→*FB|ε, F→(E)|id</p>
+    <div class="grid-2" style="margin-top:12px;">
+      <div>
+        <h4>Step 1: FIRST sets</h4>
+        <pre style="font-size:12px;">FIRST(F) = { (, id }
+FIRST(T) = FIRST(F) = { (, id }
+FIRST(E) = FIRST(T) = { (, id }
+FIRST(A) = { +, ε }
+FIRST(B) = { *, ε }</pre>
+      </div>
+      <div>
+        <h4>Step 2: FOLLOW sets</h4>
+        <pre style="font-size:12px;">FOLLOW(E) = { $, ) }
+FOLLOW(A) = FOLLOW(E) = { $, ) }
+FOLLOW(T) = FIRST(A)\{ε} ∪ FOLLOW(A)
+          = { +, $, ) }
+FOLLOW(B) = FOLLOW(T) = { +, $, ) }
+FOLLOW(F) = FIRST(B)\{ε} ∪ FOLLOW(B)
+          = { *, +, $, ) }</pre>
+      </div>
+    </div>
+    <h4 style="margin-top:12px;">Step 3: Parse Table (partial)</h4>
+    <div class="table-wrap">
+      <table style="font-size:12px;">
+        <tr><th>NT</th><th>id</th><th>(</th><th>)</th><th>+</th><th>*</th><th>$</th></tr>
+        <tr><td>E</td><td>E→TA</td><td>E→TA</td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>A</td><td></td><td></td><td>A→ε</td><td>A→+TA</td><td></td><td>A→ε</td></tr>
+        <tr><td>T</td><td>T→FB</td><td>T→FB</td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>B</td><td></td><td></td><td>B→ε</td><td>B→ε</td><td>B→*FB</td><td>B→ε</td></tr>
+        <tr><td>F</td><td>F→id</td><td>F→(E)</td><td></td><td></td><td></td><td></td></tr>
+      </table>
+    </div>
+    <p style="font-size:13px;margin-top:10px;"><strong>Grammar IS LL(1)</strong> — no cell has multiple entries. Parse trace for <code>id+id</code>: push $E, match id→F→T→E, then +TA...</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SOLVED LR(0)/SLR -->
+  <h3 style="font-family:Syne;font-size:18px;margin-bottom:16px;color:var(--accent3);">✅ SOLVED EXAMPLE 2 — LR(0) + SLR(1)</h3>
+  <div class="card">
+    <p style="font-size:13px;"><strong>Grammar:</strong> S→a|^|(T), T→ST|T', T'→,ST|ε (augmented: S'→S)</p>
+    <div class="grid-2" style="margin-top:12px;">
+      <div>
+        <h4>Step 1: LR(0) Item Sets</h4>
+        <pre style="font-size:11px;">I0: S'→•S, S→•a, S→•^, S→•(T)
+I1: S'→S•   [REDUCE on all if LR(0)]
+I2: S→a•    [REDUCE]
+I3: S→^•    [REDUCE]
+I4: S→(•T), T→•ST|T', T'→•,ST|•ε, S→•a|•^|•(T)
+I5: S→(T•)
+I6: S→(T)•  [REDUCE]
+...</pre>
+      </div>
+      <div>
+        <h4>Step 2: SLR(1) ACTION/GOTO</h4>
+        <pre style="font-size:11px;">State  a    ^    (    )    ,    $    S    T    T'
+ I0    s2   s3   s4            acc   g1
+ I1                            ACCEPT
+ I2   r:S→a  (on FOLLOW(S))
+ I3   r:S→^
+ I4    s2   s3   s4        g? shift(  g5
+ I5              s6    shift)
+ I6   r:S→(T) on FOLLOW(S)</pre>
+        <p style="font-size:11px;margin-top:8px;color:var(--muted);">FOLLOW(S)={$,),, ...} — reduce only when current input ∈ FOLLOW.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SOLVED CLR(1) -->
+  <h3 style="font-family:Syne;font-size:18px;margin-bottom:16px;color:var(--accent3);">✅ SOLVED EXAMPLE 3 — CLR(1) / LR(1)</h3>
+  <div class="card">
+    <p style="font-size:13px;"><strong>Grammar (from Dec 2023 paper):</strong> P→mPnP | nPmP | ε (augmented: P'→P)</p>
+    <div class="alert alert-purple">
+      <strong>LR(1) Item format:</strong> [P→α•β, a] where a is lookahead<br>
+      <strong>Closure rule:</strong> If [A→α•Bβ, a] in I, and B→γ is a production, add [B→•γ, b] for each b ∈ FIRST(βa)
+    </div>
+    <pre style="font-size:12px;margin-top:10px;">I0: [P'→•P, $], [P→•mPnP, $], [P→•nPmP, $], [P→•, $]
+
+I1 = GOTO(I0, P): [P'→P•, $]  — ACCEPT state
+
+I2 = GOTO(I0, m): [P→m•PnP, $]
+  Closure adds: [P→•mPnP, n], [P→•nPmP, n], [P→•, n]
+
+I3 = GOTO(I2, P): [P→mP•nP, $]
+
+I4 = GOTO(I3, n): [P→mPn•P, $]
+  Closure: [P→•mPnP, $], [P→•nPmP, $], [P→•, $]
+
+I5 = GOTO(I4, P): [P→mPnP•, $]  REDUCE on $
+
+Key: Reduce states = those with [A→α•, a] (dot at end)</pre>
+    <p style="font-size:13px;margin-top:8px;"><strong>CLR(1) advantage:</strong> The lookahead 'a' in [A→α•, a] restricts when to reduce. CLR(1) can handle grammars that SLR(1) cannot (more states but fewer conflicts).</p>
+  </div>
+</div>
+</div>
+
+<!-- ===================================================== -->
+<!-- PART 5 — TAC/DAG MASTER -->
+<!-- ===================================================== -->
+<div class="section" id="tac-dag">
+<div class="container">
+  <div class="section-title"><div class="num">5</div>TAC / DAG MASTER SECTION — 5 University Problems</div>
+  <div class="section-sub">All from actual previous papers, solved step-by-step.</div>
+
+  <!-- Problem 1 -->
+  <div class="card">
+    <h3 style="color:var(--accent2);">Problem 1: DAG + Value Numbers for (x+y)*(y+z)+(x+y+z)</h3>
+    <p style="font-size:13px;margin-bottom:10px;">[CSE3151 Nov/Dec 2024 — Q4B, 3 marks]</p>
+    <div class="grid-2">
+      <div>
+        <h4>Step 1: Build DAG with value numbers</h4>
+        <div class="table-wrap">
+          <table style="font-size:12px;">
+            <tr><th>VN</th><th>Op</th><th>Left</th><th>Right</th><th>Label</th></tr>
+            <tr><td>1</td><td>id</td><td>-</td><td>-</td><td>x</td></tr>
+            <tr><td>2</td><td>id</td><td>-</td><td>-</td><td>y</td></tr>
+            <tr><td>3</td><td>+</td><td>1</td><td>2</td><td>x+y</td></tr>
+            <tr><td>4</td><td>id</td><td>-</td><td>-</td><td>z</td></tr>
+            <tr><td>5</td><td>+</td><td>2</td><td>4</td><td>y+z</td></tr>
+            <tr><td>6</td><td>*</td><td>3</td><td>5</td><td>(x+y)*(y+z)</td></tr>
+            <tr><td>-</td><td>+</td><td>3</td><td>4</td><td>→ reuse: (3+4)=new VN 7</td></tr>
+            <tr><td>7</td><td>+</td><td>3</td><td>4</td><td>x+y+z</td></tr>
+            <tr><td>8</td><td>+</td><td>6</td><td>7</td><td>final result</td></tr>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h4>Step 2: Count nodes</h4>
+        <div class="alert alert-green">
+          <strong>AST nodes:</strong> Every subexpression = new node → ~12 nodes<br>
+          <strong>DAG nodes:</strong> x+y appears twice → SHARED (VN=3). y+z once. Total = 8 nodes<br><br>
+          <strong>Key insight to write:</strong> "DAG identifies common subexpressions (x+y used twice), reducing redundant computation. This leads to fewer TAC instructions."
+        </div>
+        <h4 style="margin-top:12px;">Step 3: TAC from DAG</h4>
+        <pre style="font-size:12px;">t1 = x + y
+t2 = y + z
+t3 = t1 * t2
+t4 = t1 + z   // reuses t1!
+t5 = t3 + t4</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Problem 2 -->
+  <div class="card">
+    <div class="card-header">
+      <h3 style="color:var(--accent2);">Problem 2: TAC + Quadruples for while loop with arrays</h3>
+      <span class="marks-badge">5M — CSE3151 2024</span>
+    </div>
+    <p style="font-size:13px;"><strong>C code:</strong> i=1; while(i&lt;=10){ A[i]=0; i=i+1; } (4-byte elements)</p>
+    <div class="grid-2" style="margin-top:12px;">
+      <div>
+        <h4>Three-Address Code</h4>
+        <pre style="font-size:12px;">1:  i = 1
+2:  L1: t1 = i <= 10
+3:  if False t1 goto L2
+4:  t2 = i * 4
+5:  A[t2] = 0
+6:  t3 = i + 1
+7:  i = t3
+8:  goto L1
+9:  L2:</pre>
+      </div>
+      <div>
+        <h4>Quadruples Table</h4>
+        <div class="table-wrap">
+          <table style="font-size:11px;">
+            <tr><th>#</th><th>op</th><th>arg1</th><th>arg2</th><th>result</th></tr>
+            <tr><td>0</td><td>=</td><td>1</td><td>-</td><td>i</td></tr>
+            <tr><td>1</td><td>&lt;=</td><td>i</td><td>10</td><td>t1</td></tr>
+            <tr><td>2</td><td>ifFalse</td><td>t1</td><td>-</td><td>L2</td></tr>
+            <tr><td>3</td><td>*</td><td>i</td><td>4</td><td>t2</td></tr>
+            <tr><td>4</td><td>[]=</td><td>0</td><td>-</td><td>A[t2]</td></tr>
+            <tr><td>5</td><td>+</td><td>i</td><td>1</td><td>t3</td></tr>
+            <tr><td>6</td><td>=</td><td>t3</td><td>-</td><td>i</td></tr>
+            <tr><td>7</td><td>goto</td><td>L1</td><td>-</td><td>-</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Problem 3 -->
+  <div class="card">
+    <div class="card-header">
+      <h3 style="color:var(--accent2);">Problem 3: DAG for z=((a+b)*c)+b+((a*a)+b+(a*a))</h3>
+      <span class="marks-badge">2M — CSE3201 2019</span>
+    </div>
+    <p style="font-size:13px;margin-bottom:10px;">Identify shared nodes.</p>
+    <div class="grid-2">
+      <div>
+        <h4>Value Number Table</h4>
+        <div class="table-wrap">
+          <table style="font-size:11px;">
+            <tr><th>VN</th><th>Op</th><th>L</th><th>R</th><th>Represents</th></tr>
+            <tr><td>1</td><td>id</td><td>-</td><td>-</td><td>a</td></tr>
+            <tr><td>2</td><td>id</td><td>-</td><td>-</td><td>b</td></tr>
+            <tr><td>3</td><td>id</td><td>-</td><td>-</td><td>c</td></tr>
+            <tr><td>4</td><td>+</td><td>1</td><td>2</td><td>a+b</td></tr>
+            <tr><td>5</td><td>*</td><td>4</td><td>3</td><td>(a+b)*c</td></tr>
+            <tr><td>6</td><td>+</td><td>5</td><td>2</td><td>...+b</td></tr>
+            <tr><td>7</td><td>*</td><td>1</td><td>1</td><td>a*a ← SHARED</td></tr>
+            <tr><td>8</td><td>+</td><td>7</td><td>2</td><td>a*a+b</td></tr>
+            <tr><td>9</td><td>+</td><td>8</td><td>7</td><td>+a*a (reuse VN7!)</td></tr>
+            <tr><td>10</td><td>+</td><td>6</td><td>9</td><td>z = result</td></tr>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="alert alert-gold">
+          <strong>Key insight:</strong><br>
+          (a*a) appears TWICE → node VN=7 is shared.<br>
+          DAG: 10 nodes<br>
+          AST: would have ~14 nodes<br><br>
+          "Inference: DAG computes (a*a) only once, generating efficient code."
+        </div>
+        <h4 style="margin-top:10px;">TAC (efficient, no redundancy)</h4>
+        <pre style="font-size:11px;">t1 = a + b
+t2 = t1 * c
+t3 = t2 + b
+t4 = a * a   // only once!
+t5 = t4 + b
+t6 = t5 + t4
+z  = t3 + t6</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Problem 4 -->
+  <div class="card">
+    <div class="card-header">
+      <h3 style="color:var(--accent2);">Problem 4: Leaders, Basic Blocks, Flow Graph</h3>
+      <span class="marks-badge">3M — CSE3151 2024 Q5A</span>
+    </div>
+    <div class="grid-2">
+      <div>
+        <h4>TAC for for-loop with array sieve (from 2019 paper)</h4>
+        <pre style="font-size:11px;">1:  s = n * n        ← LEADER (first)
+2:  i = 2
+3:  L1: t1=i<=s      ← LEADER (L1 target)
+4:  if False t1 goto L3
+5:  t2 = i * 8
+6:  t3 = a[t2]
+7:  if False t3 goto L2
+8:  count++          ← LEADER (follows conditional)
+9:  j = 2 * i
+10: L2: t4=j<=n      ← LEADER (L2 target)
+11: if False t4 goto L1
+12: a[j] = FALSE     ← LEADER (follows conditional)
+13: j = j + i
+14: goto L2
+15: L3: ...          ← LEADER</pre>
+      </div>
+      <div>
+        <h4>Basic Blocks</h4>
+        <div class="alert alert-green">
+          <strong>B1:</strong> instrs 1,2<br>
+          <strong>B2:</strong> instrs 3,4<br>
+          <strong>B3:</strong> instrs 5,6,7<br>
+          <strong>B4:</strong> instrs 8,9<br>
+          <strong>B5:</strong> instrs 10,11<br>
+          <strong>B6:</strong> instrs 12,13,14<br>
+          <strong>B7:</strong> instr 15
+        </div>
+        <p style="font-size:13px;margin-top:8px;"><strong>Flow graph edges:</strong><br>
+        B1→B2, B2→B3 (true), B2→B7 (false), B3→B4 (true), B3→B5 (false), B4→B5, B5→B6 (true), B5→B2 (false), B6→B5</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Problem 5 -->
+  <div class="card">
+    <div class="card-header">
+      <h3 style="color:var(--accent2);">Problem 5: Triples vs Indirect Triples for a=b*-c+b*-c</h3>
+      <span class="marks-badge">3M — CSE3201 Module 5</span>
+    </div>
+    <div class="grid-2">
+      <div>
+        <h4>Triples</h4>
+        <div class="table-wrap">
+          <table style="font-size:12px;">
+            <tr><th>#</th><th>op</th><th>arg1</th><th>arg2</th></tr>
+            <tr><td>(0)</td><td>uminus</td><td>c</td><td>-</td></tr>
+            <tr><td>(1)</td><td>*</td><td>b</td><td>(0)</td></tr>
+            <tr><td>(2)</td><td>uminus</td><td>c</td><td>-</td></tr>
+            <tr><td>(3)</td><td>*</td><td>b</td><td>(2)</td></tr>
+            <tr><td>(4)</td><td>+</td><td>(1)</td><td>(3)</td></tr>
+            <tr><td>(5)</td><td>=</td><td>a</td><td>(4)</td></tr>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h4>Indirect Triples (same triples + pointer list)</h4>
+        <div class="table-wrap">
+          <table style="font-size:12px;">
+            <tr><th>Instruction</th><th>→ Triple</th></tr>
+            <tr><td>(35)</td><td>(0)</td></tr>
+            <tr><td>(36)</td><td>(1)</td></tr>
+            <tr><td>(37)</td><td>(2)</td></tr>
+            <tr><td>(38)</td><td>(3)</td></tr>
+            <tr><td>(39)</td><td>(4)</td></tr>
+            <tr><td>(40)</td><td>(5)</td></tr>
+          </table>
+        </div>
+        <div class="alert alert-purple" style="margin-top:8px;font-size:12px;">
+          <strong>Advantage of indirect triples:</strong> Can reorder instructions by reordering the pointer list, WITHOUT modifying the triples themselves. Better for optimization.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===================================================== -->
+<!-- PART 6 — LAST MINUTE REVISION -->
+<!-- ===================================================== -->
+<div class="section" id="revision">
+<div class="container">
+  <div class="section-title"><div class="num">6</div>LAST MINUTE REVISION PLAN</div>
+
+  <div class="grid-2">
+    <div class="rev-box">
+      <h3 style="color:var(--accent2);font-family:Syne;margin-bottom:16px;">⏰ 2-HOUR REVISION PLAN</h3>
+      <ul class="steps">
+        <li><strong>0:00–0:20 (20 min)</strong> — Read these crash notes. Memorise the 6 phases template. Memorise FIRST/FOLLOW rules verbatim.</li>
+        <li><strong>0:20–0:40 (20 min)</strong> — Practice ONE LL(1) parse table from scratch (E→TA grammar). Write the table in your notebook without looking.</li>
+        <li><strong>0:40–0:60 (20 min)</strong> — Practice ONE LR(0)/SLR from scratch on simple grammar (S→a|^|(T) or similar). Count states and find GOTO.</li>
+        <li><strong>1:00–1:20 (20 min)</strong> — Practice TAC for while loop + draw quadruples. Do the a=b+c*(d+f) phase walkthrough once.</li>
+        <li><strong>1:20–1:35 (15 min)</strong> — Quick revision: transition diagrams for signed numbers + logical operators. Draw them without looking.</li>
+        <li><strong>1:35–1:50 (15 min)</strong> — Memorise peephole optimization 4 examples. Read SDD rules for E→TE' grammar.</li>
+        <li><strong>1:50–2:00 (10 min)</strong> — Skim this 30-minute sheet below. Sleep on time.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3 style="color:var(--accent3);font-family:Syne;margin-bottom:16px;">📋 30-MINUTE REVISION SHEET</h3>
+      <div style="font-size:13px;">
+        <p><span class="hl">Token:</span> (token-name, attr-value). Pattern = RE. Lexeme = actual string.</p>
+        <p><span class="hl">FIRST shortcuts:</span> FIRST of terminal = itself. FIRST of ε-production includes ε.</p>
+        <p><span class="hl">FOLLOW shortcuts:</span> $ ∈ FOLLOW(S). FOLLOW propagates from right context.</p>
+        <p><span class="hl">LL(1) conflict:</span> double entry in table = NOT LL(1). Happens when FIRST sets of alternatives overlap OR FIRST∩FOLLOW≠∅ when ε-production present.</p>
+        <p><span class="hl">LR(0) reduce states:</span> states where dot is at end: [A→α•]</p>
+        <p><span class="hl">SLR reduce rule:</span> if [A→α•] in state s and a∈FOLLOW(A), then ACTION[s,a]=reduce A→α</p>
+        <p><span class="hl">CLR reduce rule:</span> if [A→α•, a] in state s, then ACTION[s,a]=reduce A→α</p>
+        <p><span class="hl">TAC array:</span> x=a[i] → t=i*size; x=a[t]</p>
+        <p><span class="hl">DAG vs AST:</span> DAG shares common subexpressions. Count how many nodes saved.</p>
+        <p><span class="hl">Quadruple fields:</span> (op, arg1, arg2, result)</p>
+        <p><span class="hl">Triple:</span> (op, arg1, arg2) — result is position number</p>
+        <p><span class="hl">Leaders:</span> first instr, goto target, instr after goto/conditional</p>
+        <p><span class="hl">Peephole:</span> window over code; replace local patterns with more efficient code</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-3" style="margin-top:16px;">
+    <div class="card">
+      <h3 style="color:var(--accent4);margin-bottom:10px;">🧠 Must-Mug Definitions</h3>
+      <p style="font-size:13px;"><strong>Compiler:</strong> Translates source → target language while detecting errors.<br>
+      <strong>Lexeme:</strong> Actual sequence of chars in source code.<br>
+      <strong>Token:</strong> Classification of lexeme + optional attribute.<br>
+      <strong>Pattern:</strong> RE describing valid strings for a token.<br>
+      <strong>Parse tree:</strong> Graphical derivation of input using CFG.<br>
+      <strong>Ambiguous grammar:</strong> Produces &gt;1 parse tree for same string.<br>
+      <strong>Handle:</strong> Rightmost production in a right-sentential form.<br>
+      <strong>DAG:</strong> AST with shared nodes for common subexpressions.<br>
+      <strong>Basic block:</strong> Maximal sequence of TAC with one entry, one exit.</p>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--accent4);margin-bottom:10px;">📐 Must-Draw Diagrams</h3>
+      <ul style="font-size:13px;">
+        <li>6-phase compiler block diagram with arrows + symbol table</li>
+        <li>Lexical analyzer ↔ Parser interaction (getNextToken)</li>
+        <li>Transition diagram for signed decimal numbers</li>
+        <li>Transition diagram for relational operators</li>
+        <li>LR(0) automaton for simple grammar (3-5 states)</li>
+        <li>Predictive parser model (stack + table + input)</li>
+        <li>DAG for (x+y)*(y+z)+(x+y+z) — 8 nodes</li>
+        <li>Flow graph for while loop (4-5 basic blocks)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--accent4);margin-bottom:10px;">🔄 Must-Know Algorithms</h3>
+      <ul style="font-size:13px;">
+        <li><strong>Thompson's construction:</strong> RE→NFA (each operator adds states)</li>
+        <li><strong>Subset construction:</strong> NFA→DFA (ε-closure based)</li>
+        <li><strong>FIRST/FOLLOW computation:</strong> See rules above</li>
+        <li><strong>LL(1) parse table:</strong> Rule-based from FIRST/FOLLOW</li>
+        <li><strong>LR(0) closure:</strong> Expand items with dot before NT</li>
+        <li><strong>LR(0) goto:</strong> Advance dot, then closure</li>
+        <li><strong>DAG construction:</strong> Value number method — check ⟨op,l,r⟩ before creating node</li>
+        <li><strong>Basic block identification:</strong> 3-leader rules</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;border-color:rgba(108,99,255,0.4);">
+    <h3 style="color:var(--accent);margin-bottom:12px;">🔧 Must-Know Grammar Transformations</h3>
+    <div class="grid-3">
+      <div>
+        <h4>Left Recursion Elimination</h4>
+        <pre style="font-size:11px;">Before: E→E+T|T
+After:  E→TE'
+        E'→+TE'|ε
+
+Before: A→Aα₁|Aα₂|β₁|β₂
+After:  A→β₁A'|β₂A'
+        A'→α₁A'|α₂A'|ε</pre>
+      </div>
+      <div>
+        <h4>Left Factoring</h4>
+        <pre style="font-size:11px;">Before: S→if E then S|
+            if E then S else S
+After:  S→if E then S S'
+        S'→else S|ε
+
+Before: A→αβ₁|αβ₂
+After:  A→αA'
+        A'→β₁|β₂</pre>
+      </div>
+      <div>
+        <h4>Indirect Left Recursion</h4>
+        <pre style="font-size:11px;">S→Aa|b
+A→Ac|Sd|ε
+
+Step: substitute S in A→Sd:
+A→Ac|Aad|bd|ε
+Now eliminate direct LR:
+A→bdA'|A'
+A'→cA'|adA'|ε</pre>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===================================================== -->
+<!-- PART 7 — EXAM STRATEGY -->
+<!-- ===================================================== -->
+<div class="section" id="strategy">
+<div class="container">
+  <div class="section-title"><div class="num">7</div>EXAM STRATEGY — Maximum Score Protocol</div>
+
+  <div class="grid-2">
+    <div class="card" style="border-color:rgba(67,233,123,0.4);">
+      <h3 style="color:var(--accent3);margin-bottom:12px;">🎯 Optimal Attempt Order</h3>
+      <ol class="steps">
+        <li><strong>Q1A — Compiler phases (3M)</strong> in 8 min. Fully templated. Start here for confidence.</li>
+        <li><strong>Q5B — SDD annotated parse tree (3M)</strong> in 10 min. Formulaic once you know the grammar.</li>
+        <li><strong>Q4B — DAG + value numbers (3M)</strong> in 10 min. Very mechanical — just fill the table.</li>
+        <li><strong>Q2A — FIRST/FOLLOW + LL(1) table (5M)</strong> in 20 min. Highest mark single sub-question.</li>
+        <li><strong>Q3A — LR(0)/SLR(1) (5M)</strong> in 25 min. Most time-consuming but guaranteed in every paper.</li>
+        <li><strong>Q4A — TAC + quadruples (5M)</strong> in 15 min. Mechanical for known patterns.</li>
+        <li>Fill remaining: Q1B, Q1C (transition diagrams), Q5A, Q2B, Q2C.</li>
+      </ol>
+    </div>
+    <div class="card" style="border-color:rgba(255,107,107,0.4);">
+      <h3 style="color:var(--accent2);margin-bottom:12px;">⚠️ Partial Marks Maximisation</h3>
+      <ul style="font-size:13px;">
+        <li style="margin-bottom:8px;"><strong>For LR problems you can't finish:</strong> Show I0 fully, then list at least 3-4 more states. Draw the DFA structure. Partial credit for each correct state (≈0.5M per state).</li>
+        <li style="margin-bottom:8px;"><strong>For parse table:</strong> Even if FIRST/FOLLOW is wrong, fill the table consistently with your values. Examiner checks METHOD, not just answer.</li>
+        <li style="margin-bottom:8px;"><strong>For TAC:</strong> Write the code structure correctly (with labels and gotos), even if array offset computation is wrong. Structure = 2M, computation details = 1M.</li>
+        <li style="margin-bottom:8px;"><strong>For DAG:</strong> Draw the tree first (AST), then convert to DAG by identifying shared nodes. Even partial DAG with 2-3 shared nodes = partial credit.</li>
+        <li style="margin-bottom:8px;"><strong>For 2M definition questions:</strong> Give definition + 1 example always. Definition alone = 1M, with example = 2M.</li>
+        <li style="margin-bottom:8px;"><strong>For LEX programs:</strong> Write the structure (%%...%%) even if the RE is wrong. Program structure = 1M.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-3" style="margin-top:16px;">
+    <div class="card">
+      <h3 style="color:var(--accent4);margin-bottom:10px;">What examiners reward</h3>
+      <ul style="font-size:13px;">
+        <li>Clearly labelled diagrams (start state, accept state)</li>
+        <li>Showing working steps (not just final answer)</li>
+        <li>State explicitly: "Grammar IS/IS NOT LL(1) because..."</li>
+        <li>Naming which rule you're applying (e.g., "applying closure rule")</li>
+        <li>Neat tables with clear headers</li>
+        <li>Parsing trace in a table format</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--accent4);margin-bottom:10px;">How to handle difficult LR</h3>
+      <ul style="font-size:13px;">
+        <li>First write all items for I0 — you get marks for this alone</li>
+        <li>Compute GOTO(I0, X) for each symbol — partial states = partial marks</li>
+        <li>If stuck on closure: write "Closure of state Iₙ includes:" then list what you know</li>
+        <li>For the table: fill shift entries (easier) first, then reduce</li>
+        <li>Always state number of reduce states explicitly</li>
+        <li>A complete I0 + partial DFA = 2-3/5 marks</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--accent4);margin-bottom:10px;">Time management</h3>
+      <ul style="font-size:13px;">
+        <li>50M paper, 180 min = 3.6 min/mark</li>
+        <li>5M questions: max 18 min each</li>
+        <li>3M questions: max 11 min each</li>
+        <li>2M questions: max 7 min each</li>
+        <li>If LR takes &gt;25 min: write what you have, move on</li>
+        <li>Last 15 min: review and fill partial answers</li>
+        <li>Never leave a 2M question blank — guaranteed 1M for attempt</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="alert alert-gold" style="margin-top:16px;">
+    <strong>🔑 FINAL SECRET: The Examiner's Marking Pattern</strong>
+    Dr. Raghu's papers always have Q1=easy (phases, lex), Q2=LL(1) medium, Q3=LR hard, Q4=TAC/DAG medium, Q5=code opt medium. If you nail Q1+Q2+Q4+Q5 perfectly (targeting ~36/50) and get partial credit on Q3 (target 7-8/10 marks in Q3), you're scoring 43-44/50. That's an A grade. You do NOT need to ace the CLR(1) — just show the correct methodology.
+  </div>
+
+  <div class="card" style="margin-top:16px;background:linear-gradient(135deg,rgba(108,99,255,0.1),rgba(67,233,123,0.05));">
+    <h3 style="font-family:Syne;font-size:20px;margin-bottom:12px;">🚀 The Night-Before Summary</h3>
+    <div class="grid-3">
+      <div>
+        <h4 style="color:var(--accent3);">Know cold (no thinking)</h4>
+        <ul style="font-size:12px;">
+          <li>6 compiler phases + example</li>
+          <li>FIRST/FOLLOW rules (both)</li>
+          <li>LL(1) 3 conditions</li>
+          <li>Left recursion elimination formula</li>
+          <li>TAC for a=b+c*(d+f)</li>
+          <li>Quadruple fields (op,arg1,arg2,result)</li>
+          <li>Leader rules (3 rules)</li>
+          <li>Peephole 4 types</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:var(--accent4);">Practice once tonight</h4>
+        <ul style="font-size:12px;">
+          <li>Build LL(1) table for E→TA grammar</li>
+          <li>Build LR(0) for 3-state grammar</li>
+          <li>Draw transition diagram for signed numbers</li>
+          <li>DAG for (x+y)*(y+z)</li>
+          <li>TAC for while(i&lt;=10)</li>
+          <li>Annotated parse tree for (9+8*5)</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color:var(--accent2);">Don't waste time on</h4>
+        <ul style="font-size:12px;">
+          <li>Activation records</li>
+          <li>Symbol table implementation details</li>
+          <li>SSA</li>
+          <li>Subset construction for large NFA</li>
+          <li>YACC programs</li>
+          <li>Global error correction</li>
+          <li>Register allocation algorithms</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="footer">
+  <p>MIT MAHE Compiler Design — Exam Guide | Based on 7 previous papers (2019–2026) | CSE3151/3222</p>
+  <p style="margin-top:4px;">Good luck tomorrow. You've got this. 🎯</p>
+</div>
+
+</body>
+</html>
